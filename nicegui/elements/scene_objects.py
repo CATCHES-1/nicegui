@@ -2,6 +2,7 @@ import math
 from typing import List, Optional
 
 from .scene_object3d import Object3D
+from ..context import context
 
 
 class Group(Object3D):
@@ -172,7 +173,7 @@ class Stl(Object3D):
         :param url: URL of the STL file
         :param wireframe: whether to display the STL as a wireframe (default: `False`)
         """
-        super().__init__('stl', url, wireframe)
+        super().__init__('stl', context.client.path_prefix + url, wireframe)
 
 
 class Gltf(Object3D):
@@ -186,7 +187,7 @@ class Gltf(Object3D):
 
         :param url: URL of the glTF file
         """
-        super().__init__('gltf', url)
+        super().__init__('gltf', context.client.path_prefix + url)
 
 
 class Line(Object3D):
