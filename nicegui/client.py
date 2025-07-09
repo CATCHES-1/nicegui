@@ -103,6 +103,11 @@ class Client:
         return self.request.client.host if self.request is not None and self.request.client is not None else None
 
     @property
+    def path_prefix(self) -> str:
+        """Return the path prefix of the client, or an empty string."""
+        return self.request.headers.get('X-Forwarded-Prefix', self.request.scope.get('root_path', '')) if self.request else ''
+
+    @property
     def has_socket_connection(self) -> bool:
         """Return True if the client is connected, False otherwise."""
         return self.tab_id is not None
@@ -127,7 +132,6 @@ class Client:
     def build_response(self, request: Request, status_code: int = 200) -> Response:
         """Build a FastAPI response for the client."""
         self.outbox.updates.clear()
-        prefix = request.headers.get('X-Forwarded-Prefix', request.scope.get('root_path', ''))
         elements = json.dumps({
             id: element._to_dict() for id, element in self.elements.items()  # pylint: disable=protected-access
         })
@@ -137,7 +141,7 @@ class Client:
             'next_message_id': self.outbox.next_message_id,
         }
         vue_html, vue_styles, vue_scripts, imports, js_imports, js_imports_urls = \
-            generate_resources(prefix, self.elements.values())
+            generate_resources(self.path_prefix, self.elements.values())
         return templates.TemplateResponse(
             request=request,
             name='index.html',
@@ -159,11 +163,11 @@ class Client:
                 'vue_config_script': core.app.config.vue_config_script,
                 'title': self.resolve_title(),
                 'viewport': self.page.resolve_viewport(),
-                'favicon_url': get_favicon_url(self.page, prefix),
+                'favicon_url': get_favicon_url(self.page, self.path_prefix),
                 'dark': str(self.page.resolve_dark()),
                 'language': self.page.resolve_language(),
                 'translations': translations.get(self.page.resolve_language(), translations['en-US']),
-                'prefix': prefix,
+                'prefix': self.path_prefix,
                 'tailwind': core.app.config.tailwind,
                 'prod_js': core.app.config.prod_js,
                 'socket_io_js_query_params': socket_io_js_query_params,
