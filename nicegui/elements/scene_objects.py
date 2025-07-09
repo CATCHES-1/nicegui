@@ -173,7 +173,9 @@ class Stl(Object3D):
         :param url: URL of the STL file
         :param wireframe: whether to display the STL as a wireframe (default: `False`)
         """
-        super().__init__('stl', context.client.path_prefix + url, wireframe)
+        if url.startswith('/'):
+            url = context.client.path_prefix + url
+        super().__init__('stl', url, wireframe)
 
 
 class Gltf(Object3D):
@@ -187,7 +189,9 @@ class Gltf(Object3D):
 
         :param url: URL of the glTF file
         """
-        super().__init__('gltf', context.client.path_prefix + url)
+        if url.startswith('/'):
+            url = context.client.path_prefix + url
+        super().__init__('gltf', url)
 
 
 class Line(Object3D):
