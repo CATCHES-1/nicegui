@@ -1,4 +1,5 @@
 import math
+import re
 from typing import List, Optional
 
 from .scene_object3d import Object3D
@@ -173,7 +174,9 @@ class Stl(Object3D):
         :param url: URL of the STL file
         :param wireframe: whether to display the STL as a wireframe (default: `False`)
         """
-        if url.startswith('/'):
+        if not re.match(r'^(https?|ftps?|file)://', url): # If it's just a path on the server
+            if not url.startswith('/'):
+                url = '/' + url
             url = context.client.path_prefix + url
         super().__init__('stl', url, wireframe)
 
@@ -189,7 +192,9 @@ class Gltf(Object3D):
 
         :param url: URL of the glTF file
         """
-        if url.startswith('/'):
+        if not re.match(r'^(https?|ftps?|file)://', url): # If it's just a path on the server
+            if not url.startswith('/'):
+                url = '/' + url
             url = context.client.path_prefix + url
         super().__init__('gltf', url)
 
